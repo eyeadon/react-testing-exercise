@@ -3,15 +3,31 @@ import ProductDetail from "../../src/components/ProductDetail";
 import { http, HttpResponse } from "msw";
 import { server } from "../mocks/server";
 import { products } from "../mocks/data";
+import { db } from "../mocks/db";
 
 describe("ProductDetail", () => {
-  it("should render the product", async () => {
-    render(<ProductDetail productId={1} />);
+  let productId: number;
 
-    const item = await screen.findByText(new RegExp(products[0].name));
+  beforeAll(() => {
+    const product = db.product.create();
+    productId = product.id;
+  });
+
+  afterAll(() => {
+    db.product.delete({ where: { id: { equals: productId } } });
+  });
+
+  it("should render the product details", async () => {
+    const product = db.product.findFirst({
+      where: { id: { equals: productId } },
+    });
+
+    render(<ProductDetail productId={productId} />);
+
+    const item = await screen.findByText(new RegExp(product!.name));
     expect(item).toBeInTheDocument();
     const price = await screen.findByText(
-      new RegExp(products[0].price.toString())
+      new RegExp(product!.price.toString())
     );
     expect(price).toBeInTheDocument();
   });
