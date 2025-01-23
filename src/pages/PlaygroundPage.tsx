@@ -1,10 +1,15 @@
-import Onboarding from "../components/Onboarding";
-import SearchBox from "../components/SearchBox";
-import TermsAndConditions from "../components/TermsAndConditions";
+import { Theme } from "@radix-ui/themes";
 import BrowseProducts from "./BrowseProductsPage";
+import { CartProvider } from "../providers/CartProvider";
 
 const PlaygroundPage = () => {
-  return <BrowseProducts />;
+  return (
+    <CartProvider>
+      <Theme>
+        <BrowseProducts />
+      </Theme>
+    </CartProvider>
+  );
 };
 
 export default PlaygroundPage;

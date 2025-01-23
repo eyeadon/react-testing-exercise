@@ -3,6 +3,10 @@ import { faker } from "@faker-js/faker";
 
 // key -> models, values -> model definitions (needs getter function)
 export const db = factory({
+  category: {
+    id: primaryKey(faker.number.int),
+    name: faker.commerce.department,
+  },
   product: {
     id: primaryKey(faker.number.int),
     name: faker.commerce.productName,
