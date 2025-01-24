@@ -1,3 +1,0 @@
-describe("XXXXXXX", () => {
-  // placeholder
-});
