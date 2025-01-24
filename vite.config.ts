@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // my trial code about sourcemaps
   server: {
     // This is the default value, and will add all files with node_modules
     // in their paths to the ignore list.

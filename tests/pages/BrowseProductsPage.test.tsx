@@ -1,16 +1,14 @@
+import { Theme } from "@radix-ui/themes";
 import {
   render,
   screen,
   waitForElementToBeRemoved,
 } from "@testing-library/react";
-import { delay, http, HttpResponse } from "msw";
-import { server } from "../mocks/server";
-import BrowseProducts from "../../src/pages/BrowseProductsPage";
-import { Theme } from "@radix-ui/themes";
-import { db } from "../mocks/db";
-import { Category, Product } from "../../src/entities";
 import userEvent from "@testing-library/user-event";
+import { Category, Product } from "../../src/entities";
+import BrowseProducts from "../../src/pages/BrowseProductsPage";
 import { CartProvider } from "../../src/providers/CartProvider";
+import { db } from "../mocks/db";
 import { simulateDelay, simulateError } from "../utils";
 
 describe("BrowseProductsPage", () => {
