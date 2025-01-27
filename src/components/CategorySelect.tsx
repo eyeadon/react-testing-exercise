@@ -15,7 +15,7 @@ const CategorySelect = ({ onChange }: Props) => {
     error,
   } = useQuery<Category[], Error>({
     queryKey: ["categories"],
-    queryFn: () => axios.get<Product[]>("/categories").then((res) => res.data),
+    queryFn: () => axios.get<Category[]>("/categories").then((res) => res.data),
   });
 
   if (isLoading)

@@ -1,15 +1,7 @@
-import { Theme } from "@radix-ui/themes";
-import BrowseProducts from "./BrowseProductsPage";
-import { CartProvider } from "../providers/CartProvider";
+import ProductForm from "../components/ProductForm";
 
 const PlaygroundPage = () => {
-  return (
-    <CartProvider>
-      <Theme>
-        <BrowseProducts />
-      </Theme>
-    </CartProvider>
-  );
+  return <ProductForm />;
 };
 
 export default PlaygroundPage;
