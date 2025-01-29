@@ -48,6 +48,9 @@ describe("ProductForm", () => {
       if (product.price !== undefined)
         await user.type(await priceInput(), product.price.toString());
 
+      // for console error of act(), Radix UI select issue
+      await user.tab();
+
       await user.click(categoryInput());
       const options = screen.getAllByRole("option");
       await user.click(options[0]);
