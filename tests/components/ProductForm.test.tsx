@@ -57,7 +57,7 @@ describe("ProductForm", () => {
       if (product.price !== undefined)
         await user.type(await priceInput(), product.price.toString());
 
-      // for console error of act(), Radix UI select issue
+      // for console error of act(), Radix UI select component issue
       await user.tab();
 
       await user.click(categoryInput());
@@ -136,6 +136,11 @@ describe("ProductForm", () => {
       scenario: "longer than 255 characters",
       name: "a".repeat(256),
       errorMessage: /255/i,
+    },
+    {
+      scenario: "an empty space",
+      name: " ",
+      errorMessage: /required/i,
     },
   ])(
     "should display an error if Name is $scenario",
