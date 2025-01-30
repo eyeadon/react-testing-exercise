@@ -300,5 +300,19 @@ describe("ProductForm", () => {
     expect(form.submitButton()).not.toBeDisabled();
   });
 
+  it("should reset the form after submission", async () => {
+    const { waitForFormToLoad, getInputs, onSubmit } = renderComponent();
+
+    await waitForFormToLoad();
+    const form = getInputs();
+    await form.fill(form.validData);
+
+    // const comboBox = form.categoryInput();
+
+    expect(await form.nameInput()).toBeInTheDocument();
+    expect(await form.priceInput()).toBeInTheDocument();
+    expect(screen.getByDisplayValue(category.name)).toBeInTheDocument();
+  });
+
   // end describe
 });

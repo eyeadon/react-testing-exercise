@@ -23,6 +23,7 @@ const ProductForm = ({ product, onSubmit }: Props) => {
   const {
     register,
     handleSubmit,
+    reset,
     control,
     formState: { errors },
   } = useForm<ProductFormData>({
@@ -43,6 +44,7 @@ const ProductForm = ({ product, onSubmit }: Props) => {
           toast.error("An unexpected error occurred");
         } finally {
           setSubmitting(false);
+          reset();
         }
       })}
       className="space-y-3"
