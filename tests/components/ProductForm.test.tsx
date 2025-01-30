@@ -196,6 +196,49 @@ describe("ProductForm", () => {
     }
   );
 
+  it.each([
+    {
+      scenario: "no category selected",
+      errorMessage: /required/i,
+    },
+    {
+      scenario: "wrong categoryId",
+      categoryId: 1,
+      errorMessage: /required/i,
+    },
+  ])(
+    "should display an error if Category is $scenario",
+    async ({ categoryId, errorMessage }) => {
+      const { waitForFormToLoad, getInputs, expectErrorToBeInTheDocument } =
+        renderComponent();
+
+      await waitForFormToLoad();
+      const form = getInputs();
+
+      const user = userEvent.setup();
+
+      await user.type(await form.nameInput(), "a");
+      await user.type(await form.priceInput(), "1");
+
+      // for console error of act(), Radix UI select component issue
+      await user.tab();
+
+      // await user.click(form.categoryInput());
+      // const options = screen.getAllByRole("option");
+      // await user.click();
+      await user.click(form.submitButton());
+
+      expectErrorToBeInTheDocument(errorMessage);
+
+      if (categoryId) {
+        // get combobox
+        await user.click(form.categoryInput());
+
+        expect(screen.queryByText(categoryId)).not.toBeInTheDocument();
+      }
+    }
+  );
+
   it("should submit form when filled with correct data", async () => {
     const { waitForFormToLoad, getInputs, onSubmit } = renderComponent();
 
