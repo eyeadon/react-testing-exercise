@@ -2,6 +2,7 @@
 // executed before each test file
 
 import "@testing-library/jest-dom/vitest";
+import { PropsWithChildren, ReactNode } from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { server } from "./mocks/server";
 
@@ -9,7 +10,19 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-vi.mock("@auth0/auth0-react");
+// mock(path, factory function)
+vi.mock("@auth0/auth0-react", () => {
+  return {
+    useAuth0: vi.fn().mockReturnValue({
+      // simulating anonymous user
+      isAuthenticated: false,
+      isLoading: false,
+      user: undefined,
+    }),
+    Auth0Provider: ({ children }: PropsWithChildren) => children,
+    withAuthenticationRequired: (component: ReactNode) => component,
+  };
+});
 
 global.ResizeObserver = ResizeObserver;
 
