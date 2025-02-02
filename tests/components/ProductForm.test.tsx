@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
-import ProductForm from "../../src/components/ProductForm";
-import AllProviders from "../AllProviders";
-import { Category, Product } from "../../src/entities";
-import { db } from "../mocks/db";
 import userEvent from "@testing-library/user-event";
 import { Toaster } from "react-hot-toast";
+import ProductForm from "../../src/components/ProductForm";
+import { Category, Product } from "../../src/entities";
+import AllProviders from "../AllProviders";
+import { db } from "../mocks/db";
 
 describe("ProductForm", () => {
   let category: Category;
@@ -301,7 +301,7 @@ describe("ProductForm", () => {
   });
 
   it("should reset the form after submission", async () => {
-    const { waitForFormToLoad, getInputs, onSubmit } = renderComponent();
+    const { waitForFormToLoad, getInputs } = renderComponent();
 
     await waitForFormToLoad();
     const form = getInputs();

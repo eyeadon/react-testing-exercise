@@ -1,4 +1,4 @@
-import { it, expect, describe } from "vitest";
+import { describe, it } from "vitest";
 import { db } from "./mocks/db";
 
 describe("Main", () => {

@@ -3,20 +3,18 @@ import {
   screen,
   waitForElementToBeRemoved,
 } from "@testing-library/react";
-import ReduxProvider from "../../src/providers/ReduxProvider";
 import CategoryList from "../../src/components/CategoryList";
-import { db } from "../mocks/db";
 import { Category } from "../../src/entities";
-import { delay, http, HttpResponse } from "msw";
-import { server } from "../mocks/server";
+import AllProviders from "../AllProviders";
+import { db } from "../mocks/db";
 import { simulateDelay, simulateError } from "../utils";
 
 describe("CategoryList", () => {
   const categories: Category[] = [];
 
   beforeAll(() => {
-    [1, 2, 3].forEach(() => {
-      const category = db.category.create();
+    [1, 2, 3].forEach((item) => {
+      const category = db.category.create({ name: "Category" + item });
       categories.push(category);
     });
   });
@@ -27,11 +25,7 @@ describe("CategoryList", () => {
   });
 
   const renderComponent = () => {
-    render(
-      <ReduxProvider>
-        <CategoryList />
-      </ReduxProvider>
-    );
+    render(<CategoryList />, { wrapper: AllProviders });
   };
 
   it("should render a list of categories", async () => {

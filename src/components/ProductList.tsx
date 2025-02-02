@@ -1,7 +1,7 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 // import { useEffect, useState } from "react";
-import { Product } from "../entities";
 import { useQuery } from "react-query";
+import { Product } from "../entities";
 
 const ProductList = () => {
   const {

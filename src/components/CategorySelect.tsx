@@ -2,7 +2,7 @@ import { Select } from "@radix-ui/themes";
 import axios from "axios";
 import Skeleton from "react-loading-skeleton";
 import { useQuery } from "react-query";
-import { Category, Product } from "../entities";
+import { Category } from "../entities";
 
 interface Props {
   onChange: (categoryId: number) => void;
