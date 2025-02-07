@@ -2,6 +2,7 @@ import {
   render,
   screen,
   waitForElementToBeRemoved,
+  within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Category, Product } from "../../src/entities";
@@ -9,6 +10,7 @@ import BrowseProducts from "../../src/pages/BrowseProductsPage";
 import AllProviders from "../AllProviders";
 import { db, getProductsByCategory } from "../mocks/db";
 import { simulateDelay, simulateError } from "../utils";
+import NavBar from "../../src/components/NavBar";
 
 const renderComponent = () => {
   render(<BrowseProducts />, { wrapper: AllProviders });
@@ -36,6 +38,7 @@ const renderComponent = () => {
 
   const expectProductsToBeInTheDocument = (products: Product[]) => {
     const rows = screen.getAllByRole("row");
+    // remove header row from rows
     const dataRows = rows.slice(1);
     expect(dataRows).toHaveLength(products.length);
 
@@ -50,6 +53,51 @@ const renderComponent = () => {
     getCategoriesComboBox,
     selectCategory,
     expectProductsToBeInTheDocument,
+  };
+};
+
+const getCartControls = () => {
+  const user = userEvent.setup();
+
+  const getQuantityControls = () => ({
+    quantity: within(screen.getByRole("spinbutton")).queryByRole("status"),
+    decrementButton: screen.queryByRole("button", { name: "-" }),
+    incrementButton: screen.queryByRole("button", { name: "+" }),
+  });
+
+  const getAddToCartButton = () => {
+    const rows = screen.getAllByRole("row");
+    // remove header row from rows
+    const dataRows = rows.slice(1);
+    const firstCartButton = within(dataRows[0]).queryByRole("button", {
+      name: /add to cart/i,
+    });
+    // console.log(firstCartButton);
+    return firstCartButton;
+  };
+
+  const addToCart = async () => {
+    const button = getAddToCartButton();
+    await user.click(button!);
+    return button;
+  };
+
+  const incrementQuantity = async () => {
+    const { incrementButton } = getQuantityControls();
+    await user.click(incrementButton!);
+  };
+
+  const decrementQuantity = async () => {
+    const { decrementButton } = getQuantityControls();
+    await user.click(decrementButton!);
+  };
+
+  return {
+    getAddToCartButton,
+    getQuantityControls,
+    addToCart,
+    incrementQuantity,
+    decrementQuantity,
   };
 };
 
@@ -177,4 +225,56 @@ describe("BrowseProductsPage", () => {
     const products = db.product.getAll();
     expectProductsToBeInTheDocument(products);
   });
+
+  it("should update the cart count when product is added to cart", async () => {
+    render(
+      <>
+        <NavBar />
+        <BrowseProducts />
+      </>,
+      { wrapper: AllProviders }
+    );
+
+    const getProductsSkeleton = () =>
+      screen.queryByRole("progressbar", { name: /products/i });
+    await waitForElementToBeRemoved(getProductsSkeleton);
+
+    const { addToCart, incrementQuantity, decrementQuantity } =
+      getCartControls();
+
+    await addToCart();
+
+    const navBar = await screen.findByRole("navigation");
+    const count = await within(navBar).findByRole("status");
+
+    expect(count).toBeInTheDocument();
+    expect(count).toHaveTextContent("1");
+  });
+
+  it("should update the cart count when plus button is clicked", async () => {
+    render(
+      <>
+        <NavBar />
+        <BrowseProducts />
+      </>,
+      { wrapper: AllProviders }
+    );
+
+    const getProductsSkeleton = () =>
+      screen.queryByRole("progressbar", { name: /products/i });
+    await waitForElementToBeRemoved(getProductsSkeleton);
+
+    const { addToCart, incrementQuantity } = getCartControls();
+
+    await addToCart();
+    await incrementQuantity();
+
+    const navBar = await screen.findByRole("navigation");
+    const count = await within(navBar).findByRole("status");
+
+    expect(count).toBeInTheDocument();
+    expect(count).toHaveTextContent("2");
+  });
+
+  // end describe
 });

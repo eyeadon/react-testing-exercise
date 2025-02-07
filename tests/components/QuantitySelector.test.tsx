@@ -36,14 +36,14 @@ describe("QuantitySelector", () => {
 
     const user = userEvent.setup();
 
-    const getAddToCartButton = () =>
-      screen.queryByRole("button", { name: /add to cart/i });
-
     const getQuantityControls = () => ({
       quantity: screen.queryByRole("status"),
       decrementButton: screen.queryByRole("button", { name: "-" }),
       incrementButton: screen.queryByRole("button", { name: "+" }),
     });
+
+    const getAddToCartButton = () =>
+      screen.queryByRole("button", { name: /add to cart/i });
 
     const addToCart = async () => {
       const button = getAddToCartButton();
