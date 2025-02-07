@@ -4,12 +4,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { CartProvider } from "../src/providers/CartProvider";
 import AuthProvider from "../src/providers/AuthProvider";
 import { LanguageProvider } from "../src/providers/language/LanguageProvider";
-import {
-  BrowserRouter,
-  createBrowserRouter,
-  Router,
-  RouterProvider,
-} from "react-router-dom";
+import { BrowserRouter, createBrowserRouter } from "react-router-dom";
 import routes from "../src/routes";
 
 const AllProviders = ({ children }: PropsWithChildren) => {

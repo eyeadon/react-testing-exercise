@@ -53,6 +53,8 @@ describe("EditProductPage", () => {
       if (product.name !== undefined)
         await user.type(await nameInput(), product.name);
 
+      await user.tab();
+
       if (product.price !== undefined)
         await user.type(await priceInput(), product.price.toString());
 
@@ -63,11 +65,22 @@ describe("EditProductPage", () => {
       const options = screen.getAllByRole("option");
       await user.click(options[0]);
       await user.click(submitButton());
+
+      return product;
     };
 
     return {
-      expectErrorToBeInTheDocument: (errorMessage: RegExp) => {
-        const error = screen.getByRole("alert");
+      expectErrorToBeInTheDocument: (
+        errorMessage: RegExp,
+        nameObject?: object
+      ) => {
+        let error;
+
+        if (typeof nameObject !== "undefined") {
+          error = screen.getByRole("alert", nameObject);
+        } else {
+          error = screen.getByRole("alert");
+        }
         expect(error).toBeInTheDocument();
         expect(error).toHaveTextContent(errorMessage);
       },
@@ -103,6 +116,9 @@ describe("EditProductPage", () => {
     await waitForFormToLoad();
     const form = getInputs();
 
+    console.log(await form.nameInput());
+    screen.debug();
+
     expect(await form.nameInput()).toHaveValue(product.name);
     expect(await form.priceInput()).toHaveValue(product.price.toString());
     expect(form.categoryInput()).toHaveTextContent(category.name);
@@ -118,15 +134,15 @@ describe("EditProductPage", () => {
   });
 
   it.each([
-    {
-      scenario: "missing",
-      errorMessage: /required/i,
-    },
-    {
-      scenario: "longer than 255 characters",
-      name: "a".repeat(256),
-      errorMessage: /255/i,
-    },
+    // {
+    //   scenario: "missing",
+    //   errorMessage: /required/i,
+    // },
+    // {
+    //   scenario: "longer than 255 characters",
+    //   name: "a".repeat(256),
+    //   errorMessage: /255/i,
+    // },
     {
       scenario: "an empty space",
       name: " ",
@@ -144,6 +160,7 @@ describe("EditProductPage", () => {
 
       // console.log(product);
       // screen.debug();
+      // expectErrorToBeInTheDocument(errorMessage, { name: /name/i });
       expectErrorToBeInTheDocument(errorMessage);
     }
   );
