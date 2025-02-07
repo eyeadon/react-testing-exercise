@@ -81,8 +81,11 @@ describe("EditProductPage", () => {
         } else {
           error = screen.getByRole("alert");
         }
+
         expect(error).toBeInTheDocument();
         expect(error).toHaveTextContent(errorMessage);
+
+        return error;
       },
       waitForFormToLoad: () => screen.findByRole("form"),
       getInputs: () => {
@@ -116,8 +119,8 @@ describe("EditProductPage", () => {
     await waitForFormToLoad();
     const form = getInputs();
 
-    console.log(await form.nameInput());
-    screen.debug();
+    // console.log(await form.nameInput());
+    // screen.debug();
 
     expect(await form.nameInput()).toHaveValue(product.name);
     expect(await form.priceInput()).toHaveValue(product.price.toString());
@@ -138,16 +141,16 @@ describe("EditProductPage", () => {
     //   scenario: "missing",
     //   errorMessage: /required/i,
     // },
-    // {
-    //   scenario: "longer than 255 characters",
-    //   name: "a".repeat(256),
-    //   errorMessage: /255/i,
-    // },
     {
-      scenario: "an empty space",
-      name: " ",
-      errorMessage: /required/i,
+      scenario: "longer than 255 characters",
+      name: "a".repeat(256),
+      errorMessage: /255/i,
     },
+    // {
+    //   scenario: "an empty space",
+    //   name: " ",
+    //   errorMessage: /required/i,
+    // },
   ])(
     "should display an error if Name is $scenario",
     async ({ name, errorMessage }) => {
@@ -158,10 +161,19 @@ describe("EditProductPage", () => {
       const form = getInputs();
       await form.fill({ ...product, name: name! });
 
+      let error = expectErrorToBeInTheDocument(errorMessage, {
+        name: /errorname/i,
+      });
+      // let error = expectErrorToBeInTheDocument(errorMessage);
+      // const message = within(error).;
+
+      expect(error).toHaveAttribute(
+        "data-for",
+        expect.stringContaining("name")
+      );
+
       // console.log(product);
-      // screen.debug();
-      // expectErrorToBeInTheDocument(errorMessage, { name: /name/i });
-      expectErrorToBeInTheDocument(errorMessage);
+      screen.debug();
     }
   );
 
