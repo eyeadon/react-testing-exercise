@@ -19,17 +19,17 @@ describe("EditProductPage", () => {
   });
 
   const renderComponent = () => {
-    // type FormData = {
-    //   // iterate over keys of Product type
-    //   [K in keyof Product]: any;
-    // };
+    type FormData = {
+      // iterate over keys of Product type
+      [K in keyof Product]: any;
+    };
 
-    // const validData: FormData = {
-    //   id: 1,
-    //   name: "myProduct",
-    //   price: 10,
-    //   categoryId: category.id,
-    // };
+    const validData: FormData = {
+      id: 1,
+      name: "myProduct",
+      price: 10,
+      categoryId: category.id,
+    };
 
     mockAuthState({
       isAuthenticated: true,
@@ -44,10 +44,11 @@ describe("EditProductPage", () => {
     const nameInput = () => screen.findByPlaceholderText(/name/i);
     const priceInput = () => screen.findByPlaceholderText(/price/i);
     const categoryInput = () =>
+      // getting name from aria-label
       screen.getByRole("combobox", { name: /category/i });
     const submitButton = () => screen.getByRole("button", { name: /submit/i });
 
-    const fill = async (product: Product) => {
+    const fill = async (product: Product | FormData) => {
       const user = userEvent.setup();
 
       if (product.name !== undefined)
@@ -95,7 +96,7 @@ describe("EditProductPage", () => {
           categoryInput,
           submitButton,
           fill,
-          // validData,
+          validData,
         };
       },
     };
@@ -165,71 +166,74 @@ describe("EditProductPage", () => {
         name: /errorname/i,
       });
       // let error = expectErrorToBeInTheDocument(errorMessage);
-      // const message = within(error).;
 
       expect(error).toHaveAttribute(
         "data-for",
         expect.stringContaining("name")
       );
+    }
+  );
 
-      // console.log(product);
+  it.each([
+    // {
+    //   scenario: "0",
+    //   price: 0,
+    //   errorMessage: /1/i,
+    // },
+    // {
+    //   scenario: "negative",
+    //   price: -1,
+    //   errorMessage: /1/i,
+    // },
+    {
+      scenario: "greater than 1000",
+      price: 1001,
+      errorMessage: /1000/i,
+    },
+    {
+      scenario: "not a number",
+      price: "a",
+      errorMessage: /required/i,
+    },
+  ])(
+    "should display an error if Price is $scenario",
+    async ({ price, errorMessage }) => {
+      const { waitForFormToLoad, getInputs, expectErrorToBeInTheDocument } =
+        renderComponent();
+
+      await waitForFormToLoad();
+      const form = getInputs();
+      await form.fill({ ...form.validData, price });
+
+      let error = expectErrorToBeInTheDocument(errorMessage, {
+        name: /errorprice/i,
+      });
+
+      expect(error).toHaveAttribute(
+        "data-for",
+        expect.stringContaining("price")
+      );
+
       screen.debug();
     }
   );
 
   // it.each([
+  //   // {
+  //   //   scenario: "no category selected",
+  //   //   errorMessage: /required/i,
+  //   // },
   //   {
-  //     scenario: "missing",
-  //     errorMessage: /required/i,
-  //   },
-  //   {
-  //     scenario: "0",
-  //     price: "0",
-  //     errorMessage: /1/i,
-  //   },
-  //   {
-  //     scenario: "negative",
-  //     price: "-1",
-  //     errorMessage: /1/i,
-  //   },
-  //   {
-  //     scenario: "greater than 1000",
-  //     price: "1001",
-  //     errorMessage: /1000/i,
-  //   },
-  //   {
-  //     scenario: "not a number",
-  //     price: "a",
-  //     errorMessage: /required/i,
-  //   },
-  // ])(
-  //   "should display an error if Price is $scenario",
-  //   async ({ price, errorMessage }) => {
-  //     const { waitForFormToLoad, getInputs, expectErrorToBeInTheDocument } =
-  //       renderComponent();
-
-  //     await waitForFormToLoad();
-  //     const form = getInputs();
-
-  //     await form.fill({ ...form.validData, price });
-
-  //     expectErrorToBeInTheDocument(errorMessage);
-  //   }
-  // );
-
-  // it.each([
-  //   {
-  //     scenario: "no category selected",
-  //     errorMessage: /required/i,
-  //   },
-  //   {
-  //     scenario: "wrong categoryId",
-  //     categoryId: 1,
+  //     scenario: "wrong name",
+  //     categoryId: 123,
   //     errorMessage: /required/i,
   //   },
   // ])(
   //   "should display an error if Category is $scenario",
   //   async ({ categoryId, errorMessage }) => {
+  //     let originalCatName = category.name;
+  //     category.id = categoryId;
+
   //     const { waitForFormToLoad, getInputs, expectErrorToBeInTheDocument } =
   //       renderComponent();
 
@@ -242,11 +246,14 @@ describe("EditProductPage", () => {
   //     await user.type(await form.priceInput(), "1");
 
   //     // for console error of act(), Radix UI select component issue
-  //     await user.tab();
+  //     // await user.tab();
 
   //     // await user.click(form.categoryInput());
   //     // const options = screen.getAllByRole("option");
   //     // await user.click();
+
+  //     // must generate wrong category name or id?
+
   //     await user.click(form.submitButton());
 
   //     expectErrorToBeInTheDocument(errorMessage);
@@ -257,6 +264,8 @@ describe("EditProductPage", () => {
 
   //       expect(screen.queryByText(categoryId)).not.toBeInTheDocument();
   //     }
+
+  //     category.name = originalCatName;
   //   }
   // );
 
