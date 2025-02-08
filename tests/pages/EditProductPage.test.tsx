@@ -10,7 +10,7 @@ describe("EditProductPage", () => {
 
   beforeAll(() => {
     category = db.category.create();
-    product = db.product.create({ price: 10, categoryId: category.id });
+    product = db.product.create({ price: 1, categoryId: category.id });
   });
 
   afterAll(() => {
@@ -25,9 +25,9 @@ describe("EditProductPage", () => {
     };
 
     const validData: FormData = {
-      id: 1,
+      id: product.id,
       name: "myProduct",
-      price: 10,
+      price: 1,
       categoryId: category.id,
     };
 
@@ -41,6 +41,26 @@ describe("EditProductPage", () => {
 
     // render(<EditProductPage />, { wrapper: AllProviders });
 
+    const onSubmit = vi.fn();
+
+    const expectErrorToBeInTheDocument = (
+      errorMessage: RegExp,
+      nameObject?: object
+    ) => {
+      let error;
+
+      if (typeof nameObject !== "undefined") {
+        error = screen.getByRole("alert", nameObject);
+      } else {
+        error = screen.getByRole("alert");
+      }
+
+      expect(error).toBeInTheDocument();
+      expect(error).toHaveTextContent(errorMessage);
+
+      return error;
+    };
+
     const nameInput = () => screen.findByPlaceholderText(/name/i);
     const priceInput = () => screen.findByPlaceholderText(/price/i);
     const categoryInput = () =>
@@ -48,16 +68,18 @@ describe("EditProductPage", () => {
       screen.getByRole("combobox", { name: /category/i });
     const submitButton = () => screen.getByRole("button", { name: /submit/i });
 
-    const fill = async (product: Product | FormData) => {
+    const fill = async (prod: FormData) => {
       const user = userEvent.setup();
 
-      if (product.name !== undefined)
-        await user.type(await nameInput(), product.name);
+      if (prod.name !== undefined) {
+        await user.clear(await nameInput());
+        await user.type(await nameInput(), prod.name);
+      }
 
-      await user.tab();
-
-      if (product.price !== undefined)
-        await user.type(await priceInput(), product.price.toString());
+      if (prod.price !== undefined) {
+        await user.clear(await priceInput());
+        await user.type(await priceInput(), prod.price.toString());
+      }
 
       // for console error of act(), Radix UI select component issue
       await user.tab();
@@ -67,27 +89,12 @@ describe("EditProductPage", () => {
       await user.click(options[0]);
       await user.click(submitButton());
 
-      return product;
+      return prod;
     };
 
     return {
-      expectErrorToBeInTheDocument: (
-        errorMessage: RegExp,
-        nameObject?: object
-      ) => {
-        let error;
-
-        if (typeof nameObject !== "undefined") {
-          error = screen.getByRole("alert", nameObject);
-        } else {
-          error = screen.getByRole("alert");
-        }
-
-        expect(error).toBeInTheDocument();
-        expect(error).toHaveTextContent(errorMessage);
-
-        return error;
-      },
+      onSubmit,
+      expectErrorToBeInTheDocument,
       waitForFormToLoad: () => screen.findByRole("form"),
       getInputs: () => {
         return {
@@ -138,20 +145,16 @@ describe("EditProductPage", () => {
   });
 
   it.each([
-    // {
-    //   scenario: "missing",
-    //   errorMessage: /required/i,
-    // },
     {
       scenario: "longer than 255 characters",
       name: "a".repeat(256),
       errorMessage: /255/i,
     },
-    // {
-    //   scenario: "an empty space",
-    //   name: " ",
-    //   errorMessage: /required/i,
-    // },
+    {
+      scenario: "an empty space",
+      name: " ",
+      errorMessage: /required/i,
+    },
   ])(
     "should display an error if Name is $scenario",
     async ({ name, errorMessage }) => {
@@ -160,7 +163,7 @@ describe("EditProductPage", () => {
 
       await waitForFormToLoad();
       const form = getInputs();
-      await form.fill({ ...product, name: name! });
+      await form.fill({ ...form.validData, name: name! });
 
       let error = expectErrorToBeInTheDocument(errorMessage, {
         name: /errorname/i,
@@ -175,16 +178,16 @@ describe("EditProductPage", () => {
   );
 
   it.each([
-    // {
-    //   scenario: "0",
-    //   price: 0,
-    //   errorMessage: /1/i,
-    // },
-    // {
-    //   scenario: "negative",
-    //   price: -1,
-    //   errorMessage: /1/i,
-    // },
+    {
+      scenario: "0",
+      price: 0,
+      errorMessage: /1/i,
+    },
+    {
+      scenario: "negative",
+      price: -1,
+      errorMessage: /1/i,
+    },
     {
       scenario: "greater than 1000",
       price: 1001,
@@ -214,72 +217,27 @@ describe("EditProductPage", () => {
         expect.stringContaining("price")
       );
 
-      screen.debug();
+      // screen.debug();
     }
   );
 
-  // it.each([
-  //   // {
-  //   //   scenario: "no category selected",
-  //   //   errorMessage: /required/i,
-  //   // },
-  //   {
-  //     scenario: "wrong name",
-  //     categoryId: 123,
-  //     errorMessage: /required/i,
-  //   },
-  // ])(
-  //   "should display an error if Category is $scenario",
-  //   async ({ categoryId, errorMessage }) => {
-  //     let originalCatName = category.name;
-  //     category.id = categoryId;
+  it("should submit form when filled with correct data", async () => {
+    const { waitForFormToLoad, getInputs } = renderComponent();
 
-  //     const { waitForFormToLoad, getInputs, expectErrorToBeInTheDocument } =
-  //       renderComponent();
+    // onSubmit.mockResolvedValue(product);
 
-  //     await waitForFormToLoad();
-  //     const form = getInputs();
+    await waitForFormToLoad();
+    const form = getInputs();
 
-  //     const user = userEvent.setup();
+    await form.fill(form.validData);
 
-  //     await user.type(await form.nameInput(), "a");
-  //     await user.type(await form.priceInput(), "1");
+    // const { id, ...formDataNoId } = form.validData;
+    // expect(onSubmit).toHaveBeenCalledWith(formDataNoId);
 
-  //     // for console error of act(), Radix UI select component issue
-  //     // await user.tab();
+    screen.debug();
 
-  //     // await user.click(form.categoryInput());
-  //     // const options = screen.getAllByRole("option");
-  //     // await user.click();
-
-  //     // must generate wrong category name or id?
-
-  //     await user.click(form.submitButton());
-
-  //     expectErrorToBeInTheDocument(errorMessage);
-
-  //     if (categoryId) {
-  //       // get combobox
-  //       await user.click(form.categoryInput());
-
-  //       expect(screen.queryByText(categoryId)).not.toBeInTheDocument();
-  //     }
-
-  //     category.name = originalCatName;
-  //   }
-  // );
-
-  // it("should submit form when filled with correct data", async () => {
-  //   const { waitForFormToLoad, getInputs, onSubmit } = renderComponent();
-
-  //   await waitForFormToLoad();
-  //   const form = getInputs();
-
-  //   await form.fill(form.validData);
-
-  //   const { id, ...formDataNoId } = form.validData;
-  //   expect(onSubmit).toHaveBeenCalledWith(formDataNoId);
-  // });
+    expect(screen.getByText(/success/i)).toBeInTheDocument();
+  });
 
   // it("should show a toast with error message when form submission fails", async () => {
   //   const { waitForFormToLoad, getInputs, onSubmit } = renderComponent();
@@ -343,6 +301,58 @@ describe("EditProductPage", () => {
   //   expect(await form.priceInput()).toBeInTheDocument();
   //   expect(screen.getByDisplayValue(category.name)).toBeInTheDocument();
   // });
+
+  // CATEGORY TEST, UNNEEDED
+  // it.each([
+  //   // {
+  //   //   scenario: "no category selected",
+  //   //   errorMessage: /required/i,
+  //   // },
+  //   {
+  //     scenario: "wrong name",
+  //     categoryId: 123,
+  //     errorMessage: /required/i,
+  //   },
+  // ])(
+  //   "should display an error if Category is $scenario",
+  //   async ({ categoryId, errorMessage }) => {
+  //     let originalCatName = category.name;
+  //     category.id = categoryId;
+
+  //     const { waitForFormToLoad, getInputs, expectErrorToBeInTheDocument } =
+  //       renderComponent();
+
+  //     await waitForFormToLoad();
+  //     const form = getInputs();
+
+  //     const user = userEvent.setup();
+
+  //     await user.type(await form.nameInput(), "a");
+  //     await user.type(await form.priceInput(), "1");
+
+  //     // for console error of act(), Radix UI select component issue
+  //     // await user.tab();
+
+  //     // await user.click(form.categoryInput());
+  //     // const options = screen.getAllByRole("option");
+  //     // await user.click();
+
+  //     // must generate wrong category name or id?
+
+  //     await user.click(form.submitButton());
+
+  //     expectErrorToBeInTheDocument(errorMessage);
+
+  //     if (categoryId) {
+  //       // get combobox
+  //       await user.click(form.categoryInput());
+
+  //       expect(screen.queryByText(categoryId)).not.toBeInTheDocument();
+  //     }
+
+  //     category.name = originalCatName;
+  //   }
+  // );
 
   // end describe
 });

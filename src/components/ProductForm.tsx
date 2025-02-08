@@ -44,8 +44,8 @@ const ProductForm = ({ product, onSubmit }: Props) => {
           toast.error("An unexpected error occurred");
         } finally {
           setSubmitting(false);
-          reset();
         }
+        reset();
       })}
       className="space-y-3"
     >
