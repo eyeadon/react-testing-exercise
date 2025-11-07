@@ -16,27 +16,6 @@ const ProductDetail = ({ productId }: { productId: number }) => {
       axios.get<Product>("/products/" + productId).then((res) => res.data),
   });
 
-  // const [product, setProduct] = useState<Product | undefined>(
-  //   undefined
-  // );
-  // const [isLoading, setLoading] = useState(false);
-  // const [error, setError] = useState("");
-
-  // useEffect(() => {
-  //   if (!productId) {
-  //     setError("Invalid ProductId");
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   fetch("/products/" + productId)
-  //     .then((res) => res.json())
-  //     .then((data) => setProduct(data))
-  //     .catch((err) => setError((err as Error).message))
-  //     .finally(() => setLoading(false));
-  // }, []);
-
-  // not really needed
   if (!productId) return <div>Invalid product id</div>;
 
   if (isLoading) return <div>Loading...</div>;
